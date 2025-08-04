@@ -1,6 +1,9 @@
 import requests
 import urllib.parse
 import string
+import pandas as pd
+import ace_tools as tools
+import time
 
 # Define base keyword
 base_keyword = "supply chain analytics"
@@ -16,23 +19,20 @@ def fetch_google_suggestions(query):
         return []
     return []
 
-# Expand the base keyword by appending letters a–z and numbers 0–9
-expanded_keywords = [f"{base_keyword} {char}" for char in list(string.ascii_lowercase) + list(map(str, range(10)))]
+# Expanded keywords for autocomplete generation
+expanded_keywords = [f"{base_keyword} {char}" for char in string.ascii_lowercase + string.digits]
 
-# Collect all suggestions
+# Fetch suggestions
 all_suggestions = set()
 
 for kw in expanded_keywords:
     suggestions = fetch_google_suggestions(kw)
-    if suggestions:
-        all_suggestions.update(suggestions)
+    all_suggestions.update(suggestions)
+    time.sleep(0.2)  # Respect rate limits
 
-# Convert to sorted list and limit to 100 ideas
-final_suggestions = sorted(list(all_suggestions))[:100]
+# Select top 100 suggestions
+top_100_suggestions = sorted(all_suggestions)[:100]
 
-import pandas as pd
-import ace_tools as tools
-
-# Save to DataFrame and display
-df = pd.DataFrame(final_suggestions, columns=["Keyword Idea"])
-tools.display_dataframe_to_user(name="100 Keyword Ideas", dataframe=df)
+# Create DataFrame and show
+df = pd.DataFrame(top_100_suggestions, columns=["Keyword Suggestion"])
+tools.display_dataframe_to_user(name="Top 100 Keyword Suggestions", dataframe=df)
